@@ -77,9 +77,14 @@ public class CircleSurfaceView extends SurfaceView implements SurfaceHolder.Call
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         spawnCircle();
-        gameLoopThread.setSurfaceSize(getWidth(), getHeight());
-        gameLoopThread.setRunning(true);
-        gameLoopThread.start();
+        // Убедитесь, что gameLoopThread не запущен до его инициализации
+        if (gameLoopThread == null) {
+            gameLoopThread = new GameLoopThread(this);
+            gameLoopThread.start();
+        } else {
+            gameLoopThread.setSurfaceSize(getWidth(), getHeight());
+            gameLoopThread.setRunning(true);
+        }
     }
 
     @Override
@@ -160,11 +165,12 @@ public class CircleSurfaceView extends SurfaceView implements SurfaceHolder.Call
     @Override
     public void draw(Canvas canvas) {
         super.draw(canvas);
-        canvas.drawColor(Color.WHITE);
-
-        synchronized (surfaceHolder) {
-            for (Circle circle : circles) {
-                circle.draw(canvas);
+        if (canvas != null) {
+            canvas.drawColor(Color.WHITE);
+            synchronized (surfaceHolder) {
+                for (Circle circle : circles) {
+                    circle.draw(canvas);
+                }
             }
         }
     }
